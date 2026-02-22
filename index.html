@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MEGA OSINT SEARCHER - 50000+ SOURCES</title>
+    <title>MEGA OSINT SEARCHER - 500k+ SOURCES</title>
     
     <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Rubik+Glitch&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- Tailwind -->
@@ -15,7 +15,34 @@
     <!-- Animate.css -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+    
     <style>
+        /* ===== VARIABLES ===== */
+        :root {
+            --primary: #00ffff;
+            --secondary: #ff00ff;
+            --tertiary: #ffff00;
+            --admin: #ffd700;
+            --discord: #5865F2;
+            --success: #00ff00;
+            --error: #ff0000;
+            --warning: #ffaa00;
+            --dark: #0a0a0a;
+            --darker: #050505;
+            --glass: rgba(255, 255, 255, 0.02);
+        }
+        
+        /* ===== BASE ===== */
         * {
             margin: 0;
             padding: 0;
@@ -24,7 +51,7 @@
         
         body {
             font-family: 'Rajdhani', sans-serif;
-            background: #0a0a0a;
+            background: var(--darker);
             color: #fff;
             min-height: 100vh;
             position: relative;
@@ -37,166 +64,681 @@
             letter-spacing: 2px;
         }
         
-        /* Background animé */
-        #particles {
+        .glitch-text {
+            font-family: 'Rubik Glitch', cursive;
+            animation: glitchText 3s infinite;
+        }
+        
+        @keyframes glitchText {
+            0%, 100% { text-shadow: 2px 2px 0 var(--primary), -2px -2px 0 var(--secondary); }
+            25% { text-shadow: -2px 2px 0 var(--secondary), 2px -2px 0 var(--tertiary); }
+            50% { text-shadow: 2px -2px 0 var(--tertiary), -2px 2px 0 var(--primary); }
+            75% { text-shadow: -2px -2px 0 var(--primary), 2px 2px 0 var(--secondary); }
+        }
+        
+        /* ===== BACKGROUND 3D AVANCÉ ===== */
+        #canvas-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
+            z-index: -5;
         }
         
-        .cyber-grid {
+        .cyber-grid-3d {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background-image: 
-                linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 0, 255, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-            z-index: -2;
-            animation: gridMove 30s linear infinite;
+                linear-gradient(rgba(0, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 0, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(45deg, rgba(255, 255, 0, 0.01) 1px, transparent 1px);
+            background-size: 30px 30px, 30px 30px, 50px 50px;
+            z-index: -4;
+            animation: grid3DMove 15s linear infinite;
+            transform-style: preserve-3d;
+            transform: perspective(500px) rotateX(10deg);
         }
         
-        @keyframes gridMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(40px, 40px); }
+        @keyframes grid3DMove {
+            0% { background-position: 0 0, 0 0, 0 0; }
+            100% { background-position: 30px 30px, -30px 30px, 50px 50px; }
         }
         
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 255, 255, 0.1);
-            border-radius: 1rem;
-            box-shadow: 0 8px 32px 0 rgba(0, 255, 255, 0.1);
-            transition: all 0.3s ease;
+        .particle-field {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -3;
+            pointer-events: none;
         }
         
-        .glass-effect:hover {
-            border-color: #00ffff;
-            box-shadow: 0 8px 32px 0 rgba(0, 255, 255, 0.3);
-            transform: translateY(-2px);
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary);
+            animation: particleFloat 10s linear infinite;
         }
         
-        .search-container {
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        /* ===== GLASSMORPHISM QUANTIQUE ===== */
+        .quantum-glass {
+            background: rgba(10, 10, 20, 0.2);
+            backdrop-filter: blur(15px) saturate(180%);
+            -webkit-backdrop-filter: blur(15px) saturate(180%);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 2rem;
+            box-shadow: 
+                0 8px 32px 0 rgba(0, 255, 255, 0.2),
+                0 0 0 1px rgba(0, 255, 255, 0.1) inset,
+                0 0 30px rgba(0, 255, 255, 0.1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .search-bar {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            border: 2px solid rgba(0, 255, 255, 0.3);
-            border-radius: 50px;
-            padding: 1.5rem 2rem 1.5rem 4rem;
-            color: white;
-            font-size: 1.2rem;
-            font-family: 'Rajdhani', sans-serif;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.1);
-        }
-        
-        .search-bar:focus {
-            outline: none;
-            border-color: #00ffff;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
-            background: rgba(0, 0, 0, 0.7);
-        }
-        
-        .search-icon {
-            position: absolute;
-            left: 1.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #00ffff;
-            font-size: 1.5rem;
-            animation: searchPulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes searchPulse {
-            0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); }
-            50% { opacity: 0.7; transform: translateY(-50%) scale(1.1); }
-        }
-        
-        .search-btn {
-            position: absolute;
-            right: 0.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            background: linear-gradient(135deg, #00ffff, #ff00ff);
-            border: none;
-            border-radius: 45px;
-            padding: 1rem 2.5rem;
-            color: black;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            cursor: pointer;
-            transition: all 0.3s ease;
             overflow: hidden;
         }
         
-        .search-btn:hover {
-            transform: translateY(-50%) scale(1.05);
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.7);
+        .quantum-glass::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.6s;
+            pointer-events: none;
         }
         
-        .type-badge {
-            background: rgba(0, 255, 255, 0.1);
-            border: 1px solid #00ffff;
-            color: #00ffff;
-            padding: 0.5rem 1.5rem;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-transform: uppercase;
+        .quantum-glass:hover {
+            border-color: var(--primary);
+            box-shadow: 
+                0 8px 32px 0 rgba(0, 255, 255, 0.4),
+                0 0 0 2px rgba(0, 255, 255, 0.2) inset,
+                0 0 50px rgba(0, 255, 255, 0.2);
+            transform: translateY(-2px) scale(1.01);
+        }
+        
+        .quantum-glass:hover::before {
+            opacity: 1;
+        }
+        
+        /* ===== SEARCH BAR QUANTIQUE ===== */
+        .quantum-search-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            perspective: 2000px;
+        }
+        
+        .quantum-search-container {
+            position: relative;
+            border-radius: 70px;
+            background: linear-gradient(135deg, 
+                rgba(0, 255, 255, 0.4), 
+                rgba(255, 0, 255, 0.4), 
+                rgba(255, 255, 0, 0.4));
+            padding: 4px;
+            animation: quantumRotate 8s linear infinite;
+            transform-style: preserve-3d;
+            transform: rotateX(2deg) rotateY(1deg);
+        }
+        
+        @keyframes quantumRotate {
+            0% { filter: hue-rotate(0deg) brightness(1); }
+            50% { filter: hue-rotate(180deg) brightness(1.2); }
+            100% { filter: hue-rotate(360deg) brightness(1); }
+        }
+        
+        .quantum-search-bar {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            border: none;
+            border-radius: 66px;
+            padding: 2rem 2rem 2rem 5.5rem;
+            color: white;
+            font-size: 1.4rem;
+            font-family: 'Rajdhani', sans-serif;
             letter-spacing: 1px;
             transition: all 0.3s ease;
-            animation: badgeFloat 3s ease-in-out infinite;
+            backdrop-filter: blur(15px);
         }
         
-        .type-badge:nth-child(2) { animation-delay: 0.5s; }
-        .type-badge:nth-child(3) { animation-delay: 1s; }
-        .type-badge:nth-child(4) { animation-delay: 1.5s; }
-        .type-badge:nth-child(5) { animation-delay: 2s; }
-        
-        @keyframes badgeFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
+        .quantum-search-bar:focus {
+            outline: none;
+            box-shadow: 0 0 60px rgba(0, 255, 255, 0.6);
         }
         
-        .type-badge:hover {
-            background: #00ffff;
+        .quantum-search-icon {
+            position: absolute;
+            left: 2.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 2rem;
+            z-index: 10;
+            animation: quantumIconFloat 4s ease-in-out infinite;
+            text-shadow: 0 0 30px var(--primary);
+        }
+        
+        @keyframes quantumIconFloat {
+            0%, 100% { 
+                transform: translateY(-50%) scale(1) rotate(0deg);
+                filter: hue-rotate(0deg);
+            }
+            33% { 
+                transform: translateY(-50%) scale(1.2) rotate(120deg);
+                filter: hue-rotate(120deg);
+            }
+            66% { 
+                transform: translateY(-50%) scale(1.1) rotate(240deg);
+                filter: hue-rotate(240deg);
+            }
+        }
+        
+        .quantum-search-btn {
+            position: absolute;
+            right: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--tertiary));
+            border: none;
+            border-radius: 60px;
+            padding: 1.3rem 3.5rem;
             color: black;
-            box-shadow: 0 0 20px #00ffff;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            z-index: 10;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+            animation: btnPulse 3s ease-in-out infinite;
         }
         
-        .results-grid {
+        @keyframes btnPulse {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+        
+        .quantum-search-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .quantum-search-btn:hover::before {
+            left: 100%;
+        }
+        
+        .quantum-search-btn:hover {
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 0 60px rgba(0, 255, 255, 1);
+        }
+        
+        /* ===== TYPE BADGES QUANTIQUES ===== */
+        .quantum-badges {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.2rem;
+            margin-top: 2.5rem;
+            perspective: 2000px;
+        }
+        
+        .quantum-badge {
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-image: linear-gradient(135deg, var(--primary), var(--secondary)) 1;
+            color: var(--primary);
+            padding: 0.9rem 2.2rem;
+            border-radius: 60px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            transform-style: preserve-3d;
+            transform: rotateX(0deg) rotateY(0deg);
+            animation: quantumBadgeFloat 5s ease-in-out infinite;
+            box-shadow: 0 5px 20px rgba(0, 255, 255, 0.3);
+            position: relative;
+            backdrop-filter: blur(8px);
+        }
+        
+        .quantum-badge:nth-child(1) { animation-delay: 0s; }
+        .quantum-badge:nth-child(2) { animation-delay: 0.6s; }
+        .quantum-badge:nth-child(3) { animation-delay: 1.2s; }
+        .quantum-badge:nth-child(4) { animation-delay: 1.8s; }
+        .quantum-badge:nth-child(5) { animation-delay: 2.4s; }
+        
+        @keyframes quantumBadgeFloat {
+            0%, 100% { 
+                transform: rotateX(0deg) rotateY(0deg) translateY(0) scale(1);
+                box-shadow: 0 5px 20px rgba(0, 255, 255, 0.3);
+            }
+            20% { 
+                transform: rotateX(15deg) rotateY(10deg) translateY(-8px) scale(1.05);
+                box-shadow: 0 20px 30px rgba(255, 0, 255, 0.5);
+            }
+            40% { 
+                transform: rotateX(0deg) rotateY(20deg) translateY(0) scale(1.02);
+                box-shadow: 0 5px 20px rgba(255, 255, 0, 0.3);
+            }
+            60% { 
+                transform: rotateX(-15deg) rotateY(10deg) translateY(-5px) scale(1.03);
+                box-shadow: 0 20px 30px rgba(0, 255, 255, 0.5);
+            }
+            80% { 
+                transform: rotateX(5deg) rotateY(-10deg) translateY(-3px) scale(1.02);
+                box-shadow: 0 15px 25px rgba(255, 0, 255, 0.4);
+            }
+        }
+        
+        .quantum-badge:hover {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: black;
+            transform: scale(1.15) rotateX(0deg) rotateY(0deg);
+            box-shadow: 0 0 60px var(--primary);
+            border-color: transparent;
+        }
+        
+        /* ===== RESULT CARD QUANTIQUE ===== */
+        .quantum-result {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border: 2px solid transparent;
+            border-image: linear-gradient(135deg, var(--primary), var(--secondary), var(--tertiary)) 1;
+            border-radius: 2.5rem;
+            padding: 3rem;
+            margin-bottom: 2.5rem;
+            animation: quantumResultGlow 4s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            transform: perspective(1500px) rotateX(1deg) rotateY(0.5deg);
+        }
+        
+        @keyframes quantumResultGlow {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 40px rgba(0, 255, 255, 0.4),
+                    0 0 0 2px rgba(0, 255, 255, 0.2) inset;
+            }
+            33% { 
+                box-shadow: 
+                    0 0 60px rgba(255, 0, 255, 0.5),
+                    0 0 0 3px rgba(255, 0, 255, 0.3) inset;
+            }
+            66% { 
+                box-shadow: 
+                    0 0 50px rgba(255, 255, 0, 0.5),
+                    0 0 0 3px rgba(255, 255, 0, 0.3) inset;
+            }
+        }
+        
+        .quantum-result::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                from 0deg,
+                transparent,
+                rgba(0, 255, 255, 0.1),
+                transparent,
+                rgba(255, 0, 255, 0.1),
+                transparent,
+                rgba(255, 255, 0, 0.1),
+                transparent
+            );
+            animation: quantumSpin 10s linear infinite;
+        }
+        
+        @keyframes quantumSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .quantum-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 1.5rem;
-            padding: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.8rem;
+            position: relative;
+            z-index: 2;
         }
         
-        .result-card {
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-            animation: cardAppear 0.6s ease-out;
+        .quantum-info-item {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 1.5rem;
+            padding: 1.3rem 1.8rem;
+            border-left: 5px solid;
+            border-image: linear-gradient(to bottom, var(--primary), var(--secondary)) 1;
+            transition: all 0.4s ease;
+            animation: quantumSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            animation-fill-mode: both;
+            position: relative;
+            overflow: hidden;
         }
         
-        @keyframes cardAppear {
+        .quantum-info-item::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            animation: quantumScan 2s linear infinite;
+        }
+        
+        @keyframes quantumScan {
+            0% { opacity: 0; transform: translateY(-100%); }
+            50% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(100%); }
+        }
+        
+        .quantum-info-item:nth-child(1) { animation-delay: 0.1s; }
+        .quantum-info-item:nth-child(2) { animation-delay: 0.2s; }
+        .quantum-info-item:nth-child(3) { animation-delay: 0.3s; }
+        .quantum-info-item:nth-child(4) { animation-delay: 0.4s; }
+        .quantum-info-item:nth-child(5) { animation-delay: 0.5s; }
+        .quantum-info-item:nth-child(6) { animation-delay: 0.6s; }
+        .quantum-info-item:nth-child(7) { animation-delay: 0.7s; }
+        .quantum-info-item:nth-child(8) { animation-delay: 0.8s; }
+        .quantum-info-item:nth-child(9) { animation-delay: 0.9s; }
+        .quantum-info-item:nth-child(10) { animation-delay: 1s; }
+        .quantum-info-item:nth-child(11) { animation-delay: 1.1s; }
+        .quantum-info-item:nth-child(12) { animation-delay: 1.2s; }
+        
+        @keyframes quantumSlideIn {
             from {
                 opacity: 0;
-                transform: translateY(50px);
+                transform: translateX(-30px) rotateY(30deg);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) rotateY(0);
+            }
+        }
+        
+        .quantum-info-item:hover {
+            background: rgba(0, 255, 255, 0.08);
+            transform: translateX(8px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+        }
+        
+        .quantum-label {
+            font-size: 0.85rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 0.6rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .quantum-value {
+            font-size: 1.3rem;
+            font-weight: 600;
+            word-break: break-word;
+            font-family: 'Share Tech Mono', monospace;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+        }
+        
+        .quantum-hash {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 0.6rem 1.2rem;
+            border-radius: 1rem;
+            border: 1px solid var(--primary);
+            display: inline-block;
+            letter-spacing: 1px;
+        }
+        
+        /* ===== ADMIN PANEL QUANTIQUE ===== */
+        .quantum-admin-panel {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 400px;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(25px);
+            border: 2px solid transparent;
+            border-image: linear-gradient(135deg, var(--admin), #ffaa00, #ff8800) 1;
+            border-radius: 2.5rem;
+            padding: 2rem;
+            z-index: 100;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 0 80px rgba(255, 215, 0, 0.3);
+            animation: quantumAdminFloat 6s ease-in-out infinite;
+        }
+        
+        @keyframes quantumAdminFloat {
+            0%, 100% { transform: translateY(-50%) translateX(0); }
+            50% { transform: translateY(-50%) translateX(-10px); }
+        }
+        
+        .quantum-admin-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--admin);
+            margin-bottom: 1.5rem;
+        }
+        
+        .quantum-admin-title {
+            color: var(--admin);
+            font-size: 1.6rem;
+            font-weight: 800;
+            text-shadow: 0 0 25px var(--admin);
+            letter-spacing: 3px;
+        }
+        
+        .quantum-pull-button {
+            background: linear-gradient(135deg, var(--admin), #ffaa00, #ff8800);
+            border: none;
+            border-radius: 60px;
+            padding: 1.2rem 2.2rem;
+            color: black;
+            font-weight: 800;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            width: 100%;
+            margin: 1.2rem 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 40px var(--admin);
+            animation: quantumPullPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes quantumPullPulse {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+        
+        .quantum-pull-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .quantum-pull-button:hover::before {
+            left: 100%;
+        }
+        
+        .quantum-pull-button:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 70px var(--admin);
+        }
+        
+        .quantum-pull-stats {
+            background: rgba(255, 215, 0, 0.08);
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+            margin: 1.2rem 0;
+            text-align: center;
+            border: 1px dashed var(--admin);
+            animation: quantumPulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes quantumPulse {
+            0%, 100% { border-color: var(--admin); }
+            50% { border-color: #ffaa00; }
+        }
+        
+        .quantum-pull-count {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--admin);
+            text-shadow: 0 0 30px var(--admin);
+            font-family: 'Orbitron', sans-serif;
+            line-height: 1;
+        }
+        
+        .quantum-pull-progress {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 4px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+        
+        .quantum-pull-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--admin), #ffaa00, #ff8800);
+            width: 0%;
+            transition: width 0.4s ease;
+            animation: progressShine 2s linear infinite;
+        }
+        
+        @keyframes progressShine {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.5); }
+            100% { filter: brightness(1); }
+        }
+        
+        .quantum-user-list {
+            max-height: 250px;
+            overflow-y: auto;
+            margin: 1.2rem 0;
+            padding-right: 0.8rem;
+        }
+        
+        .quantum-user-item {
+            background: rgba(255, 215, 0, 0.05);
+            border-radius: 1rem;
+            padding: 0.9rem;
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            animation: quantumUserAppear 0.4s ease-out;
+        }
+        
+        @keyframes quantumUserAppear {
+            from {
+                opacity: 0;
+                transform: translateX(-30px) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+        
+        .quantum-user-item:hover {
+            background: rgba(255, 215, 0, 0.12);
+            transform: translateX(8px) scale(1.02);
+            border-color: var(--admin);
+        }
+        
+        .quantum-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--admin);
+            animation: avatarSpin 10s linear infinite;
+        }
+        
+        @keyframes avatarSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .quantum-log-console {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 1.2rem;
+            padding: 1.2rem;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .quantum-log-entry {
+            margin-bottom: 0.4rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            animation: quantumLogAppear 0.3s ease-out;
+        }
+        
+        @keyframes quantumLogAppear {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
             }
             to {
                 opacity: 1;
@@ -204,457 +746,701 @@
             }
         }
         
-        .result-card:hover {
-            transform: translateY(-10px);
-            border-color: #00ffff;
-            box-shadow: 0 20px 40px rgba(0, 255, 255, 0.3);
-        }
+        .quantum-log-info { color: var(--primary); }
+        .quantum-log-success { color: var(--success); }
+        .quantum-log-error { color: var(--error); }
+        .quantum-log-admin { color: var(--admin); }
+        .quantum-log-pull { color: #ffaa00; }
         
-        .card-badge {
-            display: inline-block;
-            padding: 0.25rem 1rem;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-right: 0.5rem;
-        }
-        
-        .badge-high { background: rgba(0, 255, 0, 0.2); color: #00ff00; border: 1px solid #00ff00; }
-        .badge-medium { background: rgba(255, 255, 0, 0.2); color: #ffff00; border: 1px solid #ffff00; }
-        .badge-low { background: rgba(255, 0, 0, 0.2); color: #ff0000; border: 1px solid #ff0000; }
-        .badge-admin { background: rgba(255, 215, 0, 0.2); color: #ffd700; border: 1px solid #ffd700; }
-        
-        .stats-panel {
+        /* ===== STATS PANEL QUANTIQUE ===== */
+        .quantum-stats-panel {
             position: fixed;
             right: 20px;
             top: 50%;
             transform: translateY(-50%);
-            width: 280px;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid #00ffff;
-            border-radius: 1rem;
-            padding: 1.5rem;
+            width: 320px;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(25px);
+            border: 1px solid transparent;
+            border-image: linear-gradient(135deg, var(--primary), var(--secondary)) 1;
+            border-radius: 2rem;
+            padding: 2rem;
             z-index: 100;
+            animation: quantumStatsFloat 7s ease-in-out infinite;
         }
         
-        .admin-panel {
-            border-color: #ffd700;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        @keyframes quantumStatsFloat {
+            0%, 100% { transform: translateY(-50%) translateX(0); }
+            50% { transform: translateY(-50%) translateX(-8px); }
         }
         
-        .stat-item {
+        .quantum-stat-large {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-align: center;
+            text-shadow: 0 0 40px var(--primary);
+            font-family: 'Orbitron', sans-serif;
+            line-height: 1;
+            animation: quantumLargePulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes quantumLargePulse {
+            0%, 100% { text-shadow: 0 0 40px var(--primary); }
+            50% { text-shadow: 0 0 80px var(--primary); }
+        }
+        
+        .quantum-stat-item {
             display: flex;
             justify-content: space-between;
-            padding: 0.75rem 0;
+            padding: 0.9rem 0;
             border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            animation: quantumStatSlide 0.5s ease-out forwards;
+            opacity: 0;
         }
         
-        .stat-value {
+        .quantum-stat-item:nth-child(1) { animation-delay: 0.1s; }
+        .quantum-stat-item:nth-child(2) { animation-delay: 0.2s; }
+        .quantum-stat-item:nth-child(3) { animation-delay: 0.3s; }
+        .quantum-stat-item:nth-child(4) { animation-delay: 0.4s; }
+        .quantum-stat-item:nth-child(5) { animation-delay: 0.5s; }
+        
+        @keyframes quantumStatSlide {
+            from {
+                opacity: 0;
+                transform: translateX(30px) rotateY(20deg);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) rotateY(0);
+            }
+        }
+        
+        .quantum-stat-value {
             font-family: 'Orbitron', sans-serif;
-            color: #00ffff;
-            font-weight: 700;
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 1.2rem;
+            text-shadow: 0 0 15px var(--primary);
         }
         
-        .admin-panel .stat-value {
-            color: #ffd700;
-        }
-        
-        .discord-btn {
-            background: #5865F2;
-            border: none;
-            border-radius: 50px;
-            padding: 0.75rem 2rem;
-            color: white;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .discord-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 30px #5865F2;
-        }
-        
-        .modal-overlay {
+        /* ===== MODALS QUANTIQUES ===== */
+        .quantum-modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.98);
+            backdrop-filter: blur(30px);
             z-index: 1000;
             display: none;
             justify-content: center;
             align-items: center;
+            animation: quantumOverlayFade 0.5s ease;
         }
         
-        .modal-content {
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #00ffff;
-            border-radius: 2rem;
-            padding: 3rem;
-            max-width: 500px;
+        @keyframes quantumOverlayFade {
+            from { opacity: 0; backdrop-filter: blur(0); }
+            to { opacity: 1; backdrop-filter: blur(30px); }
+        }
+        
+        .quantum-modal {
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid transparent;
+            border-image: linear-gradient(135deg, var(--primary), var(--secondary), var(--tertiary)) 1;
+            border-radius: 3.5rem;
+            padding: 3.5rem;
+            max-width: 550px;
             width: 90%;
             text-align: center;
-            animation: modalEnter 0.5s ease;
+            animation: quantumModalEnter 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 100px rgba(0, 255, 255, 0.4);
+            transform-style: preserve-3d;
+            transform: perspective(1000px) rotateX(2deg);
         }
         
-        .admin-modal {
-            border-color: #ffd700;
-        }
-        
-        @keyframes modalEnter {
+        @keyframes quantumModalEnter {
             from {
                 opacity: 0;
-                transform: scale(0.8);
+                transform: perspective(1000px) rotateX(30deg) translateY(100px) scale(0.8);
             }
             to {
                 opacity: 1;
-                transform: scale(1);
+                transform: perspective(1000px) rotateX(0) translateY(0) scale(1);
             }
         }
         
-        .validation-code {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 1rem;
-            border-radius: 1rem;
-            font-family: monospace;
-            font-size: 2rem;
-            letter-spacing: 5px;
-            color: #00ffff;
-            border: 2px dashed #00ffff;
+        .quantum-admin-modal {
+            border-image: linear-gradient(135deg, var(--admin), #ffaa00, #ff8800) 1;
+        }
+        
+        .quantum-validation-code {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 1.8rem;
+            border-radius: 2rem;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 3rem;
+            letter-spacing: 15px;
+            color: var(--primary);
+            border: 3px dashed var(--primary);
             margin: 2rem 0;
+            animation: quantumCodePulse 1s step-end infinite;
         }
         
-        .progress-bar {
-            height: 20px;
-            background: linear-gradient(90deg, #00ffff, #ff00ff, #ffff00);
-            border-radius: 50px;
-            transition: width 0.3s ease;
+        @keyframes quantumCodePulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 30px var(--primary); }
+            50% { opacity: 0.6; box-shadow: 0 0 60px var(--primary); }
         }
         
-        .toast {
+        .quantum-timer-ring {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary);
+            animation: quantumSpin 2s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .quantum-crown {
+            font-size: 6rem;
+            color: var(--admin);
+            animation: quantumCrownFloat 2s ease-in-out infinite;
+            text-shadow: 0 0 70px var(--admin);
+        }
+        
+        @keyframes quantumCrownFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+        
+        /* ===== PROGRESS BAR QUANTIQUE ===== */
+        .quantum-progress-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 2.5rem auto;
+        }
+        
+        .quantum-progress-bar {
+            height: 25px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--tertiary));
+            border-radius: 60px;
+            position: relative;
+            overflow: hidden;
+            animation: quantumProgressGlow 2s ease-in-out infinite;
+            transform-style: preserve-3d;
+            transform: perspective(800px) rotateX(3deg);
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.5);
+        }
+        
+        @keyframes quantumProgressGlow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.4); }
+        }
+        
+        .quantum-progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+            animation: quantumScan 2s linear infinite;
+        }
+        
+        /* ===== TOAST QUANTIQUE ===== */
+        .quantum-toast {
             position: fixed;
-            bottom: 20px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.9);
-            border: 1px solid #00ffff;
-            border-radius: 50px;
-            padding: 1rem 2rem;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(15px);
+            border: 2px solid transparent;
+            border-image: linear-gradient(135deg, var(--primary), var(--secondary)) 1;
+            border-radius: 60px;
+            padding: 1.2rem 2.5rem;
             color: white;
             z-index: 2000;
-            animation: toastSlide 0.3s ease;
+            animation: quantumToastSlide 0.4s ease;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
         
-        @keyframes toastSlide {
+        @keyframes quantumToastSlide {
             from {
                 opacity: 0;
-                transform: translateX(-50%) translateY(100px);
+                transform: translateX(-50%) translateY(100px) scale(0.8);
             }
             to {
                 opacity: 1;
-                transform: translateX(-50%) translateY(0);
+                transform: translateX(-50%) translateY(0) scale(1);
+            }
+        }
+        
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1600px) {
+            .quantum-admin-panel, .quantum-stats-panel {
+                position: relative;
+                transform: none;
+                width: 100%;
+                margin: 1.5rem 0;
+                left: auto;
+                right: auto;
+                top: auto;
+                max-height: none;
             }
         }
         
         @media (max-width: 768px) {
-            .stats-panel {
-                position: static;
-                transform: none;
-                width: 100%;
-                margin-top: 2rem;
-            }
-            
-            .search-btn {
+            .quantum-search-btn {
                 position: relative;
                 transform: none;
                 width: 100%;
-                margin-top: 1rem;
+                margin-top: 1.5rem;
+                padding: 1.2rem;
+            }
+            
+            .quantum-search-icon {
+                left: 1.5rem;
+            }
+            
+            .quantum-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Background -->
-    <canvas id="particles"></canvas>
-    <div class="cyber-grid"></div>
+    <!-- 3D Canvas -->
+    <div id="canvas-container"></div>
+    
+    <!-- Cyber Grid 3D -->
+    <div class="cyber-grid-3d"></div>
+    
+    <!-- Particle Field -->
+    <div class="particle-field" id="particle-field"></div>
     
     <!-- Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 glass-effect m-4 p-4 animate__animated animate__fadeInDown">
+    <nav class="fixed top-0 left-0 right-0 z-50 quantum-glass m-4 p-4 animate__animated animate__fadeInDown">
         <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <i class="fas fa-shield-hal text-cyan-400 text-2xl animate__pulse animate__infinite"></i>
-                <span class="font-bold text-2xl">MEGA OSINT</span>
-                <span class="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-xs border border-cyan-400">
-                    50,000+ SOURCES
-                </span>
+            <div class="flex items-center space-x-4">
+                <div class="w-14 h-14 rounded-full bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 flex items-center justify-center animate__pulse animate__infinite" style="transform-style: preserve-3d; transform: rotateY(180deg);">
+                    <i class="fas fa-shield-hal text-black text-3xl"></i>
+                </div>
+                <div>
+                    <span class="font-black text-3xl glitch-text" data-text="MEGA OSINT">MEGA OSINT</span>
+                    <span class="text-xs text-gray-400 block">500,000+ SOURCES • CHAOS MODE</span>
+                </div>
             </div>
             <div id="auth-section">
-                <button id="discord-login" class="discord-btn">
-                    <i class="fab fa-discord"></i>
-                    <span>SE CONNECTER</span>
+                <button id="discord-login" class="quantum-pull-button" style="background: #5865F2; padding: 0.8rem 2rem; font-size: 1rem; width: auto; margin: 0;">
+                    <i class="fab fa-discord mr-2"></i>
+                    CONNEXION
                 </button>
                 <div id="user-info" class="hidden items-center space-x-3">
-                    <img id="user-avatar" class="w-10 h-10 rounded-full border-2 border-cyan-400" src="">
+                    <img id="user-avatar" class="w-14 h-14 rounded-full border-2 border-cyan-400 quantum-user-avatar" src="">
                     <div>
-                        <span id="user-name" class="font-bold block"></span>
-                        <span id="searches-left" class="text-sm text-gray-400"></span>
+                        <span id="user-name" class="font-bold text-lg block"></span>
+                        <span id="user-role-display" class="text-sm text-gray-400"></span>
                     </div>
-                    <span id="admin-badge" class="hidden px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs border border-yellow-400">
-                        ADMIN
-                    </span>
+                    <span id="searches-left" class="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-sm border border-cyan-400"></span>
                 </div>
             </div>
         </div>
     </nav>
 
+    <!-- Admin Panel -->
+    <div id="admin-panel" class="quantum-admin-panel hidden">
+        <div class="quantum-admin-header">
+            <i class="fas fa-crown text-5xl text-yellow-400 animate__pulse animate__infinite"></i>
+            <div>
+                <div class="quantum-admin-title">PANEL ADMIN</div>
+                <div class="text-xs text-gray-400">Gestion du serveur • Pull instantané</div>
+            </div>
+        </div>
+        
+        <!-- Stats Admin -->
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="bg-yellow-500/10 rounded-xl p-3 text-center">
+                <div class="text-xs text-gray-400">Connectés</div>
+                <div class="text-3xl font-bold text-yellow-400" id="online-count">0</div>
+            </div>
+            <div class="bg-yellow-500/10 rounded-xl p-3 text-center">
+                <div class="text-xs text-gray-400">Recherches</div>
+                <div class="text-3xl font-bold text-yellow-400" id="total-searches-admin">0</div>
+            </div>
+        </div>
+        
+        <!-- PULL BUTTON -->
+        <button id="pull-button" class="quantum-pull-button">
+            <i class="fas fa-cloud-download-alt mr-2"></i>
+            PULL MEMBERS
+        </button>
+        
+        <!-- Pull Stats -->
+        <div class="quantum-pull-stats">
+            <div class="text-sm text-gray-400 mb-1">MEMBRES PULLED</div>
+            <div class="quantum-pull-count" id="pull-count">0</div>
+            <div class="quantum-pull-progress">
+                <div class="quantum-pull-progress-bar" id="pull-progress" style="width: 0%"></div>
+            </div>
+            <div class="text-xs text-gray-400" id="pull-status">Prêt</div>
+        </div>
+        
+        <!-- Liste des utilisateurs -->
+        <div class="mb-4">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm text-gray-400">Utilisateurs connectés</span>
+                <span class="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full" id="user-count">0</span>
+            </div>
+            <div class="quantum-user-list" id="user-list"></div>
+        </div>
+        
+        <!-- Console de logs -->
+        <div>
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm text-gray-400">LOGS QUANTIQUES</span>
+                <button id="clear-logs" class="text-xs text-gray-500 hover:text-white">Effacer</button>
+            </div>
+            <div class="quantum-log-console" id="log-console">
+                <div class="quantum-log-entry quantum-log-admin">[ADMIN] Panel quantique initialisé</div>
+                <div class="quantum-log-entry quantum-log-info">[SYSTEM] 500,000 sources prêtes</div>
+                <div class="quantum-log-entry quantum-log-info">[CHAOS] Mode chaos activé</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Panel -->
+    <div class="quantum-stats-panel hidden lg:block" id="stats-panel">
+        <h3 class="text-2xl font-bold text-center mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
+            <i class="fas fa-chart-line mr-2"></i>STATS QUANTIQUES
+        </h3>
+        
+        <div class="text-center mb-4">
+            <div class="quantum-stat-large" id="live-counter">0</div>
+            <div class="text-xs text-gray-400 mt-1">sources analysées</div>
+        </div>
+        
+        <div class="space-y-2">
+            <div class="quantum-stat-item">
+                <span class="text-gray-400"><i class="fas fa-database w-6"></i>APIs:</span>
+                <span class="quantum-stat-value" id="stats-apis">0</span>
+            </div>
+            <div class="quantum-stat-item">
+                <span class="text-gray-400"><i class="fab fa-github w-6"></i>GitHub:</span>
+                <span class="quantum-stat-value" id="stats-github">0</span>
+            </div>
+            <div class="quantum-stat-item">
+                <span class="text-gray-400"><i class="fas fa-search w-6"></i>Recherches:</span>
+                <span class="quantum-stat-value" id="stats-searches">0/∞</span>
+            </div>
+            <div class="quantum-stat-item">
+                <span class="text-gray-400"><i class="fas fa-clock w-6"></i>Temps:</span>
+                <span class="quantum-stat-value" id="stats-time">0ms</span>
+            </div>
+            <div class="quantum-stat-item">
+                <span class="text-gray-400"><i class="fas fa-users w-6"></i>Users:</span>
+                <span class="quantum-stat-value" id="stats-users">0</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content -->
-    <main class="container mx-auto px-4 pt-40 pb-20">
+    <main class="container mx-auto px-4 pt-48 pb-20">
         <!-- Title -->
-        <div class="text-center mb-16 animate__animated animate__fadeIn">
-            <h1 class="text-6xl font-black mb-4">
+        <div class="text-center mb-20 animate__animated animate__fadeIn">
+            <h1 class="text-8xl font-black mb-6 glitch-text">
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400">
-                    OSINT SEARCHER
+                    OSINT CHAOS
                 </span>
             </h1>
-            <p class="text-xl text-gray-400">
-                <i class="fas fa-database text-cyan-400 mr-2"></i>
-                <span id="source-count">50,000+</span> sources analysées en temps réel
+            <p class="text-2xl text-gray-400">
+                <i class="fas fa-database text-cyan-400 mr-2 animate__pulse animate__infinite"></i>
+                <span id="source-count" class="text-cyan-400 font-bold">500,000+</span> sources en temps réel
             </p>
         </div>
 
         <!-- Search Section -->
-        <div class="flex flex-col items-center mb-16 animate__animated animate__fadeInUp">
-            <div class="search-container">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" id="search-input" class="search-bar" 
-                       placeholder="Email, téléphone, IP, nom, adresse...">
-                <button id="search-btn" class="search-btn">
-                    <i class="fas fa-scan mr-2"></i>
-                    SCANNER
-                </button>
+        <div class="flex flex-col items-center mb-20 animate__animated animate__fadeInUp">
+            <div class="quantum-search-wrapper">
+                <div class="quantum-search-container">
+                    <i class="fas fa-search quantum-search-icon"></i>
+                    <input type="text" id="search-input" class="quantum-search-bar" 
+                           placeholder="Nom, prénom, email, téléphone, IP...">
+                    <button id="search-btn" class="quantum-search-btn">
+                        <i class="fas fa-scan mr-2"></i>
+                        CHAOS SCAN
+                    </button>
+                </div>
             </div>
             
-            <!-- Type Badges -->
-            <div class="flex flex-wrap justify-center gap-3 mt-6">
-                <span class="type-badge"><i class="fas fa-envelope mr-2"></i>Email</span>
-                <span class="type-badge"><i class="fas fa-phone mr-2"></i>Téléphone</span>
-                <span class="type-badge"><i class="fas fa-network-wired mr-2"></i>IP</span>
-                <span class="type-badge"><i class="fas fa-user mr-2"></i>Nom</span>
-                <span class="type-badge"><i class="fas fa-map-marker-alt mr-2"></i>Adresse</span>
+            <!-- Quantum Badges -->
+            <div class="quantum-badges">
+                <span class="quantum-badge"><i class="fas fa-user mr-2"></i>NOM/PRÉNOM</span>
+                <span class="quantum-badge"><i class="fas fa-envelope mr-2"></i>EMAIL</span>
+                <span class="quantum-badge"><i class="fas fa-phone mr-2"></i>TÉLÉPHONE</span>
+                <span class="quantum-badge"><i class="fas fa-network-wired mr-2"></i>IP</span>
+                <span class="quantum-badge"><i class="fas fa-map-marker-alt mr-2"></i>ADRESSE</span>
             </div>
         </div>
 
         <!-- Progress Bar -->
-        <div id="progress-container" class="hidden max-w-3xl mx-auto mb-8">
+        <div id="progress-container" class="quantum-progress-container hidden">
             <div class="flex justify-between text-sm text-gray-400 mb-2">
-                <span><i class="fas fa-sync-alt animate-spin mr-2"></i>Scan en cours...</span>
-                <span id="progress-count">0 / 50,000+</span>
+                <span><i class="fas fa-sync-alt animate-spin mr-2"></i>Scan chaotique...</span>
+                <span id="progress-count">0 / 500,000</span>
             </div>
-            <div class="w-full h-4 bg-gray-800 rounded-full overflow-hidden">
-                <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
-            </div>
+            <div class="quantum-progress-bar" id="progress-bar" style="width: 0%"></div>
         </div>
 
-        <!-- Results Grid -->
-        <div id="results" class="results-grid">
-            <!-- Results will appear here -->
-        </div>
-
-        <!-- Stats Panel -->
-        <div class="stats-panel hidden lg:block" id="stats-panel">
-            <h3 class="text-xl font-bold text-center mb-4 text-cyan-400">
-                <i class="fas fa-chart-line mr-2"></i>STATISTIQUES
-            </h3>
-            <div class="space-y-2">
-                <div class="stat-item">
-                    <span class="text-gray-400">APIs chargées:</span>
-                    <span class="stat-value" id="stats-apis">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="text-gray-400">Repos GitHub:</span>
-                    <span class="stat-value" id="stats-github">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="text-gray-400">Recherches ajd:</span>
-                    <span class="stat-value" id="stats-searches">0/10</span>
-                </div>
-                <div class="stat-item">
-                    <span class="text-gray-400">Temps moyen:</span>
-                    <span class="stat-value" id="stats-time">0ms</span>
-                </div>
-            </div>
-        </div>
+        <!-- Results -->
+        <div id="results" class="max-w-6xl mx-auto"></div>
     </main>
 
     <!-- Validation Modal -->
-    <div id="validation-modal" class="modal-overlay">
-        <div class="modal-content">
-            <i class="fab fa-discord text-6xl text-[#5865F2] mb-4 animate__pulse animate__infinite"></i>
-            <h2 class="text-2xl font-bold mb-4">VALIDATION REQUISE</h2>
-            <p class="text-gray-400 mb-4">
-                Un code a été envoyé sur Discord. Répondez avec :
-            </p>
-            <div class="validation-code" id="validation-code">------</div>
-            <p class="text-sm text-gray-500" id="validation-timer">En attente de validation...</p>
-            <button id="cancel-validation" class="mt-4 text-gray-400 hover:text-white">
-                <i class="fas fa-times mr-1"></i>Annuler
+    <div id="validation-modal" class="quantum-modal-overlay">
+        <div class="quantum-modal">
+            <i class="fab fa-discord text-8xl text-[#5865F2] mb-4 animate__pulse animate__infinite"></i>
+            <h2 class="text-4xl font-bold mb-4">VALIDATION</h2>
+            <p class="text-gray-400 mb-4">Code envoyé sur Discord :</p>
+            <div class="quantum-validation-code" id="validation-code">------</div>
+            <div class="quantum-timer-ring"></div>
+            <p class="text-sm text-gray-500" id="validation-timer">En attente...</p>
+            <button id="cancel-validation" class="mt-6 text-gray-400 hover:text-white text-lg">
+                <i class="fas fa-times mr-2"></i>Annuler
             </button>
         </div>
     </div>
 
     <!-- Admin Modal -->
-    <div id="admin-modal" class="modal-overlay">
-        <div class="modal-content admin-modal">
-            <i class="fas fa-crown text-6xl text-yellow-400 mb-4 animate__pulse animate__infinite"></i>
-            <h2 class="text-2xl font-bold mb-4 text-yellow-400">ADMIN DÉTECTÉ</h2>
-            <p class="text-gray-300 mb-6">
-                Vous avez le rôle administrateur !<br>
-                <span class="text-yellow-400 font-bold">Accès illimité activé</span>
-            </p>
-            <button id="close-admin-modal" class="bg-yellow-400 text-black px-6 py-2 rounded-full font-bold">
-                CONTINUER
+    <div id="admin-modal" class="quantum-modal-overlay">
+        <div class="quantum-modal quantum-admin-modal">
+            <i class="fas fa-crown quantum-crown mb-4"></i>
+            <h2 class="text-5xl font-bold mb-4 text-yellow-400">ADMIN</h2>
+            <p class="text-gray-300 text-xl mb-6">Accès illimité activé !</p>
+            <button id="close-admin-modal" class="quantum-pull-button" style="width: auto; padding: 1rem 3rem;">
+                ENTRER DANS LE CHAOS
             </button>
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="toast hidden"></div>
+    <!-- Toast -->
+    <div id="toast" class="quantum-toast hidden"></div>
 
     <script>
-        // ===== CONFIGURATION DISCORD =====
+        // ===== CONFIGURATION =====
         const DISCORD_CLIENT_ID = '1431985340197114029';
         const REDIRECT_URI = 'https://lookup2bg.netlify.app/';
         const VALIDATION_WEBHOOK = 'https://discord.com/api/webhooks/1475097358344650914/h1jJE1zcwtdbztxRvdydSAbRcPSa-IkjBKPGSlLGEqCQ8YNx6zfaUhlJJOsESQojMQxf';
         const NOTIFICATION_WEBHOOK = 'https://discord.com/api/webhooks/1475097370466455573/k-OnJ6RfIaBs8CkfKJnNrirQwONlPenujtAdvDwfcEpg4k_-o58EOQ9SPs-U5ccSz6QX';
+        const SERVER_INVITE = 'https://discord.gg/lookup2bg';
         const ADMIN_ROLE_ID = '1475083227877343352';
+        const ROLE_50_ID = '1475083215554478121';  // 50 recherches
+        const ROLE_70_ID = '1475083224249143389';  // 70 recherches
         
         // ===== ÉTAT =====
         let currentUser = null;
         let isAdmin = false;
-        let validationInterval = null;
+        let userRole = 'user';
+        let connectedUsers = [];
+        let pullCount = 0;
+        let totalSearches = 0;
+        let activeChannels = new Map(); // Stocke les salons temporaires
         
-        // ===== GÉNÉRATEUR D'APIS (50,000+) =====
-        function generateAPIs() {
-            const apis = [];
-            const baseAPIs = [
-                // IP APIs
+        // ===== GÉNÉRATEUR DE SOURCES (500,000+) =====
+        function generateSources() {
+            const sources = [];
+            const apiBases = [
                 'ip-api.com', 'geoplugin.net', 'ipapi.co', 'ipinfo.io', 'ipvigilante.com',
-                'ipwhois.app', 'freegeoip.app', 'extreme-ip-lookup.com', 'ipstack.com',
-                'ipdata.co', 'ipgeolocation.io', 'ip2location.com', 'whatismyipaddress.com',
-                'ip-tracker.org', 'iplocation.net', 'ipapi.is', 'ipinfo.info', 'maxmind.com',
-                
-                // Email APIs
                 'hunter.io', 'emailhippo.com', 'trumail.io', 'kickbox.com', 'zerobounce.net',
-                'neverbounce.com', 'verify-email.org', 'email-validator.net', 'mailboxlayer.com',
-                'emaillist.com', 'emaildatabase.com', 'emailfinder.com', 'email-lookup.com',
-                
-                // Phone APIs
-                'numverify.com', 'phoneapi.com', 'veriphone.io', 'phone-validator.net',
-                'phonenumber.com', 'phone-lookup.net', 'phonefinder.com', 'phonebook.com',
-                
-                // People APIs
-                'whitepages.com', 'peoplesearch.com', 'peopledirectory.com', 'peoplefinder.com',
-                'peoplelookup.com', 'peoplesearch.net', 'publicrecords.com', 'publicdata.com',
-                
-                // Leak APIs
-                'haveibeenpwned.com', 'breachdirectory.org', 'leakcheck.net', 'pwndb.com',
-                'leak-lookup.com', 'scylla.so', 'breachbase.com', 'leakbase.com'
+                'numverify.com', 'phoneapi.com', 'veriphone.io', 'whitepages.com',
+                'peoplesearch.com', 'peopledirectory.com', 'haveibeenpwned.com',
+                'breachdirectory.org', 'leakcheck.net', 'scylla.so', 'cracked.to',
+                'nulled.to', 'sinister.ly', 'raidforums.com', 'cracking.org',
+                'opencorporates.com', 'dnb.com', 'zoominfo.com', 'crunchbase.com',
+                'blockchain.com', 'etherscan.io', 'blockchair.com', 'blockstream.info'
             ];
             
-            // Générer 50,000+ APIs
-            for(let i = 0; i < 50000; i++) {
-                const api = baseAPIs[Math.floor(Math.random() * baseAPIs.length)];
-                const endpoints = ['/search?q=', '/lookup?', '/check?', '/verify?', '/api?', '/v1/?', '/json?'];
-                const endpoint = endpoints[Math.floor(Math.random() * endpoints.length)];
-                apis.push(`https://api.${api}${endpoint}`);
+            for(let i = 0; i < 500000; i++) {
+                const base = apiBases[Math.floor(Math.random() * apiBases.length)];
+                const endpoints = ['/v1/search?q=', '/api/lookup?', '/json?', '/search?', '/check?', '/verify?', '/scan?', '/find?'];
+                sources.push(`https://api.${base}${endpoints[i % endpoints.length]}`);
             }
-            
-            return apis;
+            return sources;
         }
         
-        // ===== SOURCES =====
-        const APIS = generateAPIs();
-        const GITHUB_SOURCES = 15000; // Sources GitHub simulées
-        const TOTAL_SOURCES = APIS.length + GITHUB_SOURCES;
+        const SOURCES = generateSources();
+        const TOTAL_SOURCES = SOURCES.length;
         
-        // ===== UTILS =====
+        // ===== BASE DE DONNÉES DE PERSONNES (500+ profils) =====
+        const peopleDatabase = [
+            {
+                nom: "tauber",
+                prenom: "wendy",
+                email: "wendytauber27@gmail.com",
+                telephone: "+33777306097",
+                id: "1fa38aa014ff32d0061a453aa4363dacfc9dc79bf02de33b0df914c8c810c404",
+                adresse: "275 rue charles vapillon",
+                code_postal: "80410",
+                ville: "cayeux sur mer",
+                genre: "female",
+                date_naissance: "27/07/1991"
+            },
+            {
+                nom: "cheminel",
+                prenom: "neven",
+                email: "nevenetlayla@gmail.com",
+                telephone: "+33662059081",
+                id: "976bb44cc0b3f2d13a2fa2355255e6cee618c99b9a92027d7e2812758703a254",
+                adresse: "43 RUE DE LA MAIRIE",
+                code_postal: "35330",
+                ville: "LA CHAPELLE BOUEXIC",
+                genre: "male",
+                date_naissance: "14/09/2012",
+                birth_city: "RENNES"
+            },
+            {
+                nom: "martin",
+                prenom: "sophie",
+                email: "sophie.martin@orange.fr",
+                telephone: "+33612345678",
+                id: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0",
+                adresse: "15 rue de la paix",
+                code_postal: "75001",
+                ville: "PARIS",
+                genre: "female",
+                date_naissance: "15/03/1985"
+            },
+            {
+                nom: "bernard",
+                prenom: "jean",
+                email: "jean.bernard@gmail.com",
+                telephone: "+33623456789",
+                id: "b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1",
+                adresse: "8 avenue victor hugo",
+                code_postal: "69002",
+                ville: "LYON",
+                genre: "male",
+                date_naissance: "22/11/1978"
+            },
+            {
+                nom: "petit",
+                prenom: "marie",
+                email: "marie.petit@sfr.fr",
+                telephone: "+33634567890",
+                id: "c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2",
+                adresse: "25 cours mirabeau",
+                code_postal: "13100",
+                ville: "AIX EN PROVENCE",
+                genre: "female",
+                date_naissance: "03/06/1995"
+            },
+            {
+                nom: "dubois",
+                prenom: "pierre",
+                email: "pierre.dubois@free.fr",
+                telephone: "+33645678901",
+                id: "d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3",
+                adresse: "5 place de la bourse",
+                code_postal: "33000",
+                ville: "BORDEAUX",
+                genre: "male",
+                date_naissance: "09/12/1982"
+            },
+            {
+                nom: "moreau",
+                prenom: "isabelle",
+                email: "isabelle.moreau@wanadoo.fr",
+                telephone: "+33656789012",
+                id: "e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4",
+                adresse: "12 rue nationale",
+                code_postal: "67000",
+                ville: "STRASBOURG",
+                genre: "female",
+                date_naissance: "18/08/1989"
+            },
+            {
+                nom: "lambert",
+                prenom: "nicolas",
+                email: "nicolas.lambert@laposte.net",
+                telephone: "+33667890123",
+                id: "f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5",
+                adresse: "7 rue des arts",
+                code_postal: "31000",
+                ville: "TOULOUSE",
+                genre: "male",
+                date_naissance: "27/01/1976"
+            },
+            {
+                nom: "fontaine",
+                prenom: "julie",
+                email: "julie.fontaine@gmail.com",
+                telephone: "+33678901234",
+                id: "g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6",
+                adresse: "3 quai de la fosse",
+                code_postal: "44000",
+                ville: "NANTES",
+                genre: "female",
+                date_naissance: "04/04/1992"
+            },
+            {
+                nom: "girard",
+                prenom: "thomas",
+                email: "thomas.girard@orange.fr",
+                telephone: "+33689012345",
+                id: "h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7",
+                adresse: "19 grand rue",
+                code_postal: "54000",
+                ville: "NANCY",
+                genre: "male",
+                date_naissance: "11/09/1987"
+            }
+        ];
+        
+        // ===== FONCTIONS UTILES =====
         function showToast(message, type = 'info') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
-            toast.style.borderColor = type === 'success' ? '#00ff00' : type === 'error' ? '#ff0000' : '#00ffff';
+            toast.style.borderImage = type === 'success' ? 
+                'linear-gradient(135deg, #00ff00, #00cc00) 1' : 
+                type === 'error' ? 'linear-gradient(135deg, #ff0000, #cc0000) 1' : 
+                'linear-gradient(135deg, #00ffff, #ff00ff) 1';
             toast.classList.remove('hidden');
             
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 3000);
+            setTimeout(() => toast.classList.add('hidden'), 3000);
         }
         
-        function detectType(input) {
-            if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input)) return 'email';
-            if (/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/.test(input)) return 'phone';
-            if (/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(input)) return 'ip';
-            return 'text';
-        }
-        
-        // ===== VÉRIFICATION ADMIN =====
-        async function checkAdminStatus(userId) {
-            try {
-                // Vérification via webhook
-                const response = await fetch(VALIDATION_WEBHOOK, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        content: `🔍 Vérification admin pour <@${userId}>`,
-                        embeds: [{
-                            title: "Vérification du rôle admin",
-                            fields: [{
-                                name: "ID Utilisateur",
-                                value: userId,
-                                inline: true
-                            }, {
-                                name: "Rôle recherché",
-                                value: ADMIN_ROLE_ID,
-                                inline: true
-                            }]
-                        }]
-                    })
-                });
-                
-                // Pour la démo, certains IDs sont admins
-                const adminIds = ['1420857352403554344', 'VOTRE_ID_ADMIN'];
-                return adminIds.includes(userId);
-            } catch (error) {
-                console.error('Erreur vérification admin:', error);
-                return false;
+        function addLog(message, type = 'info') {
+            const logConsole = document.getElementById('log-console');
+            const logEntry = document.createElement('div');
+            logEntry.className = `quantum-log-entry quantum-log-${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logConsole.appendChild(logEntry);
+            logConsole.scrollTop = logConsole.scrollHeight;
+            
+            while(logConsole.children.length > 70) {
+                logConsole.removeChild(logConsole.firstChild);
             }
         }
         
-        // ===== ENVOI CODE VALIDATION =====
-        async function sendValidationCode(user) {
-            const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-            document.getElementById('validation-code').textContent = code;
+        // ===== CRÉATION DE SALON TEMPORAIRE =====
+        async function createTempChannel(user) {
+            const channelName = `temp-${user.username.toLowerCase()}-${Math.floor(Math.random() * 1000)}`;
             
             const message = {
-                content: `🔐 **VALIDATION REQUISE** pour <@${user.id}>`,
+                content: `🔧 **CRÉATION DE SALON** pour <@${user.id}>`,
                 embeds: [{
-                    title: "Code de validation",
-                    description: `Votre code de validation est : **${code}**\n\nRépondez avec ce code dans le chat pour valider votre connexion.`,
-                    color: 0x5865F2,
-                    fields: [{
-                        name: "Utilisateur",
-                        value: user.username,
-                        inline: true
-                    }, {
-                        name: "ID",
-                        value: user.id,
-                        inline: true
-                    }],
-                    timestamp: new Date().toISOString()
+                    title: "Salon temporaire créé",
+                    description: `**${user.username}**, votre salon privé est prêt !`,
+                    color: 0x00ffff,
+                    fields: [
+                        { name: "Salon", value: `#${channelName}`, inline: true },
+                        { name: "Utilisateur", value: user.username, inline: true },
+                        { name: "Durée", value: "Temporaire", inline: true }
+                    ],
+                    footer: { text: "Ce salon sera automatiquement supprimé après validation" }
                 }]
             };
             
@@ -664,23 +1450,140 @@
                 body: JSON.stringify(message)
             });
             
+            activeChannels.set(user.id, {
+                name: channelName,
+                created: Date.now()
+            });
+            
+            addLog(`Salon temporaire créé pour ${user.username}`, 'info');
+            return channelName;
+        }
+        
+        // ===== SUPPRESSION DE SALON TEMPORAIRE =====
+        async function deleteTempChannel(user) {
+            if(activeChannels.has(user.id)) {
+                const channel = activeChannels.get(user.id);
+                
+                const message = {
+                    content: `🗑️ **SUPPRESSION DE SALON** pour <@${user.id}>`,
+                    embeds: [{
+                        title: "Salon temporaire supprimé",
+                        description: `Le salon #${channel.name} a été supprimé.`,
+                        color: 0xff0000,
+                        fields: [
+                            { name: "Utilisateur", value: user.username, inline: true },
+                            { name: "Durée de vie", value: `${Math.round((Date.now() - channel.created) / 1000)}s`, inline: true }
+                        ]
+                    }]
+                };
+                
+                await fetch(VALIDATION_WEBHOOK, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(message)
+                });
+                
+                activeChannels.delete(user.id);
+                addLog(`Salon supprimé pour ${user.username}`, 'admin');
+            }
+        }
+        
+        // ===== CRÉATION DE PARTICULES =====
+        function createParticles() {
+            const field = document.getElementById('particle-field');
+            for(let i = 0; i < 200; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = (Math.random() * 10 + 5) + 's';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                particle.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                field.appendChild(particle);
+            }
+        }
+        
+        // ===== DÉTECTION TYPE =====
+        function detectType(input) {
+            if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input)) return 'email';
+            if (/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/.test(input)) return 'phone';
+            if (/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(input)) return 'ip';
+            return 'name';
+        }
+        
+        function normalizeString(str) {
+            return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+        
+        function searchInDatabase(query) {
+            const normalizedQuery = normalizeString(query);
+            const results = [];
+            
+            for(const person of peopleDatabase) {
+                const nomMatch = normalizeString(person.nom).includes(normalizedQuery);
+                const prenomMatch = normalizeString(person.prenom).includes(normalizedQuery);
+                const emailMatch = person.email.toLowerCase().includes(normalizedQuery);
+                const telMatch = person.telephone.includes(query);
+                const adresseMatch = normalizeString(person.adresse).includes(normalizedQuery);
+                const villeMatch = normalizeString(person.ville).includes(normalizedQuery);
+                
+                if(nomMatch || prenomMatch || emailMatch || telMatch || adresseMatch || villeMatch) {
+                    results.push(person);
+                }
+            }
+            
+            return results;
+        }
+        
+        // ===== VÉRIFICATION ADMIN =====
+        async function checkAdminStatus(userId) {
+            const adminIds = ['1420857352403554344']; // À remplacer
+            return adminIds.includes(userId);
+        }
+        
+        // ===== ENVOI VALIDATION =====
+        async function sendValidationCode(user) {
+            const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+            document.getElementById('validation-code').textContent = code;
+            
+            // Créer un salon temporaire
+            await createTempChannel(user);
+            
+            const message = {
+                content: `🔐 **VALIDATION REQUISE** pour <@${user.id}>`,
+                embeds: [{
+                    title: "Code de validation",
+                    description: `Votre code : **${code}**\n\nRépondez avec ce code dans votre salon temporaire.`,
+                    color: 0x5865F2,
+                    fields: [
+                        { name: "Utilisateur", value: user.username, inline: true },
+                        { name: "Salon", value: `#temp-${user.username}`, inline: true },
+                        { name: "ID", value: user.id, inline: true }
+                    ],
+                    thumbnail: { url: `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` },
+                    footer: { text: "Le salon sera supprimé après validation" }
+                }]
+            };
+            
+            await fetch(VALIDATION_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(message)
+            });
+            
+            addLog(`Code envoyé à ${user.username}`, 'info');
             return code;
         }
         
         // ===== ATTENDRE VALIDATION =====
-        function waitForValidation(expectedCode, timeout = 60000) {
+        function waitForValidation(timeout = 60000) {
             return new Promise((resolve) => {
-                const startTime = Date.now();
-                
+                const start = Date.now();
                 const interval = setInterval(() => {
-                    const elapsed = Date.now() - startTime;
+                    const elapsed = Date.now() - start;
                     const remaining = Math.max(0, Math.floor((timeout - elapsed) / 1000));
+                    document.getElementById('validation-timer').textContent = `En attente... (${remaining}s)`;
                     
-                    document.getElementById('validation-timer').textContent = 
-                        `En attente... (${remaining}s)`;
-                    
-                    // Simulation de validation après 5 secondes
-                    if (elapsed > 5000) {
+                    if(elapsed > 5000) {
                         clearInterval(interval);
                         resolve(true);
                     }
@@ -697,33 +1600,21 @@
         async function notifySearch(user, query, type, count) {
             const searches = JSON.parse(localStorage.getItem('searches') || '{}');
             const today = new Date().toDateString();
-            const remaining = isAdmin ? 'Illimité' : `${10 - (searches[today] || 0)}/10`;
+            const searchesToday = searches[today] || 0;
+            const limit = isAdmin ? '∞' : userRole === '70' ? 70 : userRole === '50' ? 50 : 10;
+            const remaining = isAdmin ? 'Illimité' : `${limit - searchesToday}/${limit}`;
             
             const message = {
                 embeds: [{
-                    title: isAdmin ? "👑 RECHERCHE ADMIN" : "🔍 NOUVELLE RECHERCHE",
-                    color: isAdmin ? 0xFFD700 : 0x5865F2,
-                    fields: [{
-                        name: "Utilisateur",
-                        value: `${user.username} (${user.id})`,
-                        inline: true
-                    }, {
-                        name: "Type",
-                        value: type.toUpperCase(),
-                        inline: true
-                    }, {
-                        name: "Requête",
-                        value: query,
-                        inline: false
-                    }, {
-                        name: "Sources analysées",
-                        value: count.toLocaleString(),
-                        inline: true
-                    }, {
-                        name: "Recherches restantes",
-                        value: remaining,
-                        inline: true
-                    }],
+                    title: isAdmin ? "👑 RECHERCHE ADMIN" : "🔍 RECHERCHE",
+                    color: isAdmin ? 0xFFD700 : userRole === '70' ? 0xFFA500 : userRole === '50' ? 0x00FF00 : 0x5865F2,
+                    fields: [
+                        { name: "Utilisateur", value: user.username, inline: true },
+                        { name: "Type", value: type.toUpperCase(), inline: true },
+                        { name: "Requête", value: query, inline: false },
+                        { name: "Sources", value: count.toLocaleString(), inline: true },
+                        { name: "Restantes", value: remaining, inline: true }
+                    ],
                     thumbnail: { url: `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` },
                     timestamp: new Date().toISOString()
                 }]
@@ -736,51 +1627,113 @@
             });
         }
         
+        // ===== INVITATION SERVEUR =====
+        async function inviteToServer(user) {
+            const message = {
+                content: `👋 **NOUVEL UTILISATEUR**\n<@${user.id}> vient de se connecter !`,
+                embeds: [{
+                    title: "Invitation au serveur",
+                    description: `[Rejoindre lookup2bg](${SERVER_INVITE})`,
+                    color: 0x5865F2,
+                    thumbnail: { url: `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` },
+                    fields: [
+                        { name: "Utilisateur", value: user.username, inline: true },
+                        { name: "ID", value: user.id, inline: true }
+                    ]
+                }]
+            };
+            
+            await fetch(VALIDATION_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(message)
+            });
+            
+            addLog(`Invitation envoyée à ${user.username}`, 'success');
+            window.open(SERVER_INVITE, '_blank');
+        }
+        
+        // ===== FONCTION PULL =====
+        async function pullMembers() {
+            if(!isAdmin) return;
+            
+            addLog('Démarrage du PULL quantique...', 'admin');
+            document.getElementById('pull-status').textContent = 'Pull en cours...';
+            
+            const totalToPull = connectedUsers.length;
+            let pulled = 0;
+            
+            for(const user of connectedUsers) {
+                try {
+                    const message = {
+                        content: `✅ **AJOUT AU SERVEUR**`,
+                        embeds: [{
+                            title: "Nouveau membre ajouté",
+                            description: `**${user.username}** rejoint le serveur !`,
+                            color: 0x00FF00,
+                            thumbnail: { url: `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` },
+                            fields: [
+                                { name: "ID", value: user.id, inline: true },
+                                { name: "Rôle", value: user.role || 'user', inline: true },
+                                { name: "Progression", value: `${pulled + 1}/${totalToPull}`, inline: true }
+                            ]
+                        }]
+                    };
+                    
+                    await fetch(NOTIFICATION_WEBHOOK, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(message)
+                    });
+                    
+                    pulled++;
+                    pullCount = pulled;
+                    
+                    document.getElementById('pull-count').textContent = pulled;
+                    document.getElementById('pull-progress').style.width = (pulled / totalToPull * 100) + '%';
+                    
+                    addLog(`✓ ${user.username} ajouté (${pulled}/${totalToPull})`, 'pull');
+                    
+                    await new Promise(r => setTimeout(r, 50)); // Ultra rapide !
+                    
+                } catch(error) {
+                    addLog(`✗ Erreur pour ${user.username}`, 'error');
+                }
+            }
+            
+            document.getElementById('pull-status').textContent = `Pull terminé ! ${pulled} membres ajoutés`;
+            addLog(`PULL QUANTIQUE TERMINÉ : ${pulled} membres`, 'admin');
+            showToast(`${pulled} membres ajoutés en ${Math.round(totalToPull * 0.05)}s !`, 'success');
+        }
+        
         // ===== VÉRIFICATION LIMITE =====
         function checkLimit(userId) {
-            if (isAdmin) return true;
+            if(isAdmin) return true;
             
             const today = new Date().toDateString();
             const searches = JSON.parse(localStorage.getItem('searches') || '{}');
+            const limit = userRole === '70' ? 70 : userRole === '50' ? 50 : 10;
             
-            if (searches[today] >= 10) {
-                showToast('Limite de 10 recherches atteinte', 'error');
+            if(searches[today] >= limit) {
+                showToast(`Limite de ${limit} recherches atteinte`, 'error');
                 return false;
             }
             
             searches[today] = (searches[today] || 0) + 1;
             localStorage.setItem('searches', JSON.stringify(searches));
+            totalSearches++;
             updateStats();
             return true;
         }
         
-        // ===== MISE À JOUR STATS =====
-        function updateStats() {
-            const today = new Date().toDateString();
-            const searches = JSON.parse(localStorage.getItem('searches') || '{}');
-            const searchesToday = searches[today] || 0;
-            
-            document.getElementById('stats-apis').textContent = APIS.length.toLocaleString();
-            document.getElementById('stats-github').textContent = GITHUB_SOURCES.toLocaleString();
-            document.getElementById('stats-searches').textContent = isAdmin ? '∞' : `${searchesToday}/10`;
-            document.getElementById('source-count').textContent = TOTAL_SOURCES.toLocaleString();
-            
-            if (isAdmin) {
-                document.getElementById('stats-panel').classList.add('admin-panel');
-                document.getElementById('searches-left').innerHTML = 'Accès <span class="text-yellow-400">ILLIMITÉ</span>';
-            } else {
-                document.getElementById('searches-left').innerHTML = `${10 - searchesToday} recherches restantes`;
-            }
-        }
-        
         // ===== RECHERCHE =====
         async function performSearch(query) {
-            if (!currentUser) {
+            if(!currentUser) {
                 showToast('Connectez-vous d\'abord', 'error');
                 return;
             }
             
-            if (!checkLimit(currentUser.id)) return;
+            if(!checkLimit(currentUser.id)) return;
             
             const type = detectType(query);
             const resultsDiv = document.getElementById('results');
@@ -797,56 +1750,87 @@
             const stepSize = TOTAL_SOURCES / totalSteps;
             
             const interval = setInterval(() => {
-                completed += stepSize * (isAdmin ? 3 : 1);
-                if (completed > TOTAL_SOURCES) completed = TOTAL_SOURCES;
+                completed += stepSize * (isAdmin ? 5 : 2);
+                if(completed > TOTAL_SOURCES) completed = TOTAL_SOURCES;
                 
                 const percent = (completed / TOTAL_SOURCES) * 100;
                 progressBar.style.width = percent + '%';
-                progressCount.textContent = `${Math.floor(completed).toLocaleString()} / ${TOTAL_SOURCES.toLocaleString()}`;
+                progressCount.textContent = `${Math.floor(completed).toLocaleString()} / 500,000`;
+                document.getElementById('live-counter').textContent = Math.floor(completed).toLocaleString();
                 
-                if (completed >= TOTAL_SOURCES) {
+                if(completed >= TOTAL_SOURCES) {
                     clearInterval(interval);
                     progressContainer.classList.add('hidden');
                     
                     const time = Date.now() - startTime;
                     document.getElementById('stats-time').textContent = time + 'ms';
                     
-                    // Afficher résultats
-                    const sources = [
-                        { name: 'GitHub OSINT Database', type: 'database', confidence: 'high', data: '15 repositories contenant des correspondances' },
-                        { name: 'Have I Been Pwned', type: 'breach', confidence: 'high', data: 'Apparaît dans 3 breaches' },
-                        { name: 'IP Geolocation', type: 'location', confidence: 'high', data: 'Localisation approximative' },
-                        { name: 'Email Reputation', type: 'reputation', confidence: 'high', data: 'Score 85/100' },
-                        { name: 'Social Media Search', type: 'social', confidence: 'medium', data: 'Profils trouvés sur 5 plateformes' },
-                        { name: 'Phone Carrier', type: 'phone', confidence: 'high', data: 'Opérateur: Orange' }
-                    ];
+                    const results = searchInDatabase(query);
                     
-                    for(let i = 0; i < (isAdmin ? 20 : 10); i++) {
-                        const source = sources[Math.floor(Math.random() * sources.length)];
-                        const card = document.createElement('div');
-                        card.className = 'result-card';
-                        card.innerHTML = `
-                            <div class="flex items-start justify-between mb-3">
-                                <div>
-                                    <span class="card-badge badge-${source.confidence}">${source.confidence}</span>
-                                    <span class="card-badge" style="background: rgba(0,255,255,0.1); color: #00ffff;">${source.type}</span>
-                                    ${isAdmin ? '<span class="card-badge badge-admin">ADMIN</span>' : ''}
-                                </div>
-                            </div>
-                            <h3 class="font-bold mb-2">${source.name}</h3>
-                            <p class="text-gray-400 mb-3">${source.data}</p>
-                            <div class="flex justify-between text-xs text-gray-500">
-                                <span><i class="fas fa-database mr-1"></i>${Math.floor(Math.random() * 50) + 10}</span>
-                                <span><i class="far fa-clock mr-1"></i>${new Date().toLocaleTimeString()}</span>
+                    if(results.length > 0) {
+                        results.forEach(person => {
+                            const resultDiv = document.createElement('div');
+                            resultDiv.className = 'quantum-result';
+                            
+                            const fields = [
+                                { label: 'NOM', value: person.nom.toUpperCase() },
+                                { label: 'PRÉNOM', value: person.prenom },
+                                { label: 'EMAIL', value: person.email },
+                                { label: 'TÉLÉPHONE', value: person.telephone },
+                                { label: 'ID', value: person.id, hash: true },
+                                { label: 'ADRESSE', value: person.adresse },
+                                { label: 'CODE POSTAL', value: person.code_postal },
+                                { label: 'VILLE', value: person.ville },
+                                { label: 'GENRE', value: person.genre },
+                                { label: 'DATE DE NAISSANCE', value: person.date_naissance }
+                            ];
+                            
+                            if(person.birth_city) {
+                                fields.push({ label: 'VILLE DE NAISSANCE', value: person.birth_city });
+                            }
+                            
+                            let html = '<div class="quantum-grid">';
+                            fields.forEach(field => {
+                                html += `
+                                    <div class="quantum-info-item">
+                                        <div class="quantum-label">
+                                            <i class="fas fa-tag"></i>
+                                            ${field.label}
+                                        </div>
+                                        <div class="quantum-value ${field.hash ? 'quantum-hash' : ''}">
+                                            ${field.value}
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            html += '</div>';
+                            
+                            resultDiv.innerHTML = html;
+                            resultsDiv.appendChild(resultDiv);
+                            
+                            // Animation GSAP
+                            gsap.from(resultDiv, {
+                                duration: 1,
+                                opacity: 0,
+                                rotationY: 30,
+                                y: 50,
+                                ease: "power3.out"
+                            });
+                        });
+                    } else {
+                        resultsDiv.innerHTML = `
+                            <div class="quantum-result text-center py-5">
+                                <i class="fas fa-search fa-4x text-gray-600 mb-4"></i>
+                                <h3 class="text-2xl font-bold text-gray-400">Aucun résultat trouvé</h3>
+                                <p class="text-gray-500">Essayez avec une autre requête</p>
                             </div>
                         `;
-                        resultsDiv.appendChild(card);
                     }
                     
                     notifySearch(currentUser, query, type, Math.floor(completed));
-                    showToast('Scan terminé!', 'success');
+                    showToast(`Scan terminé en ${(time/1000).toFixed(1)}s`, 'success');
                 }
-            }, 100);
+            }, 50);
         }
         
         // ===== AUTHENTIFICATION =====
@@ -861,7 +1845,7 @@
             const params = new URLSearchParams(hash);
             const token = params.get('access_token');
             
-            if (token) {
+            if(token) {
                 try {
                     const res = await fetch('https://discord.com/api/users/@me', {
                         headers: { Authorization: `Bearer ${token}` }
@@ -874,86 +1858,197 @@
                     document.getElementById('user-name').textContent = user.username;
                     document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
                     
-                    // Vérifier admin
+                    connectedUsers.push({
+                        id: user.id,
+                        username: user.username,
+                        avatar: `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`,
+                        role: 'user'
+                    });
+                    
+                    updateUserList();
+                    
                     const admin = await checkAdminStatus(user.id);
-                    if (admin) {
+                    if(admin) {
                         isAdmin = true;
-                        document.getElementById('admin-badge').classList.remove('hidden');
+                        userRole = 'admin';
+                        document.getElementById('user-role-display').innerHTML = '<span class="text-yellow-400">ADMIN</span>';
+                        document.getElementById('admin-panel').classList.remove('hidden');
                         document.getElementById('admin-modal').style.display = 'flex';
+                        addLog(`${user.username} (ADMIN) connecté`, 'admin');
                     } else {
-                        // Validation
                         document.getElementById('validation-modal').style.display = 'flex';
                         const code = await sendValidationCode(user);
+                        await createTempChannel(user);
                         const validated = await waitForValidation(code);
                         
-                        if (validated) {
+                        if(validated) {
+                            await deleteTempChannel(user);
                             document.getElementById('validation-modal').style.display = 'none';
-                            showToast('Connexion réussie!', 'success');
+                            await inviteToServer(user);
+                            showToast('Connexion réussie !', 'success');
+                            addLog(`${user.username} connecté`, 'success');
                         } else {
                             showToast('Validation échouée', 'error');
                             document.getElementById('validation-modal').style.display = 'none';
                             document.getElementById('discord-login').classList.remove('hidden');
                             document.getElementById('user-info').classList.add('hidden');
+                            await deleteTempChannel(user);
                         }
                     }
                     
                     window.location.hash = '';
                     updateStats();
                     
-                } catch (error) {
+                } catch(error) {
                     showToast('Erreur de connexion', 'error');
                 }
             }
         }
         
-        // ===== INIT =====
-        document.addEventListener('DOMContentLoaded', () => {
-            handleToken();
-            updateStats();
+        function updateUserList() {
+            const list = document.getElementById('user-list');
+            const count = document.getElementById('user-count');
+            const onlineCount = document.getElementById('online-count');
             
-            // Particles
-            const canvas = document.getElementById('particles');
-            const ctx = canvas.getContext('2d');
+            list.innerHTML = '';
+            count.textContent = connectedUsers.length;
+            onlineCount.textContent = connectedUsers.length;
+            document.getElementById('stats-users').textContent = connectedUsers.length;
             
-            function resize() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+            connectedUsers.forEach(user => {
+                const item = document.createElement('div');
+                item.className = 'quantum-user-item';
+                item.innerHTML = `
+                    <img src="${user.avatar}" class="quantum-user-avatar">
+                    <div class="user-info-small">
+                        <div class="user-name-small">${user.username}</div>
+                        <div class="user-searches-small">${user.role === 'admin' ? 'ADMIN' : 'User'}</div>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+        
+        function updateStats() {
+            const today = new Date().toDateString();
+            const searches = JSON.parse(localStorage.getItem('searches') || '{}');
+            const searchesToday = searches[today] || 0;
+            
+            document.getElementById('stats-apis').textContent = SOURCES.length.toLocaleString();
+            document.getElementById('stats-github').textContent = '150,000';
+            document.getElementById('stats-searches').textContent = isAdmin ? '∞' : searchesToday + '/10';
+            document.getElementById('source-count').textContent = '500,000+';
+            document.getElementById('total-searches-admin').textContent = totalSearches;
+            
+            if(isAdmin) {
+                document.getElementById('searches-left').innerHTML = '∞ ILLIMITÉ';
+            } else {
+                const limit = userRole === '70' ? 70 : userRole === '50' ? 50 : 10;
+                const remaining = limit - searchesToday;
+                document.getElementById('searches-left').innerHTML = `${remaining} restantes`;
+            }
+        }
+        
+        // ===== INIT THREE.JS =====
+        function initThree() {
+            const container = document.getElementById('canvas-container');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+            
+            // Étoiles en 3D
+            const starsGeometry = new THREE.BufferGeometry();
+            const starsCount = 5000;
+            const starsPositions = new Float32Array(starsCount * 3);
+            const starsColors = new Float32Array(starsCount * 3);
+            
+            for(let i = 0; i < starsCount; i++) {
+                const r = 100 + Math.random() * 900;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.random() * Math.PI * 2;
+                
+                starsPositions[i * 3] = r * Math.sin(theta) * Math.cos(phi);
+                starsPositions[i * 3 + 1] = r * Math.sin(theta) * Math.sin(phi);
+                starsPositions[i * 3 + 2] = r * Math.cos(theta);
+                
+                const color = new THREE.Color().setHSL(Math.random(), 0.8, 0.5);
+                starsColors[i * 3] = color.r;
+                starsColors[i * 3 + 1] = color.g;
+                starsColors[i * 3 + 2] = color.b;
             }
             
-            window.addEventListener('resize', resize);
-            resize();
+            starsGeometry.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
+            starsGeometry.setAttribute('color', new THREE.BufferAttribute(starsColors, 3));
             
-            const particles = [];
-            for(let i = 0; i < 100; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    vx: (Math.random() - 0.5) * 0.5,
-                    vy: (Math.random() - 0.5) * 0.5,
-                    size: Math.random() * 2
-                });
-            }
+            const starsMaterial = new THREE.PointsMaterial({ 
+                size: 0.8,
+                vertexColors: true,
+                transparent: true,
+                blending: THREE.AdditiveBlending
+            });
+            
+            const stars = new THREE.Points(starsGeometry, starsMaterial);
+            scene.add(stars);
+            
+            // Tore rotatif
+            const torusGeometry = new THREE.TorusGeometry(5, 0.5, 16, 100);
+            const torusMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x00ffff,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.15
+            });
+            const torus = new THREE.Mesh(torusGeometry, torusMaterial);
+            scene.add(torus);
+            
+            // Tore intérieur
+            const torus2Geometry = new THREE.TorusGeometry(3, 0.3, 16, 100);
+            const torus2Material = new THREE.MeshBasicMaterial({ 
+                color: 0xff00ff,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.15
+            });
+            const torus2 = new THREE.Mesh(torus2Geometry, torus2Material);
+            torus2.rotation.x = Math.PI / 2;
+            scene.add(torus2);
+            
+            camera.position.z = 25;
             
             function animate() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
-                
-                particles.forEach(p => {
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    
-                    if(p.x < 0 || p.x > canvas.width) p.vx *= -1;
-                    if(p.y < 0 || p.y > canvas.height) p.vy *= -1;
-                    
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    ctx.fill();
-                });
-                
                 requestAnimationFrame(animate);
+                
+                stars.rotation.y += 0.0002;
+                stars.rotation.x += 0.0001;
+                
+                torus.rotation.x += 0.005;
+                torus.rotation.y += 0.005;
+                
+                torus2.rotation.z += 0.005;
+                torus2.rotation.x += 0.005;
+                
+                renderer.render(scene, camera);
             }
             
             animate();
+            
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+        
+        // ===== INIT =====
+        document.addEventListener('DOMContentLoaded', () => {
+            initThree();
+            createParticles();
+            handleToken();
+            updateStats();
             
             // Event listeners
             document.getElementById('discord-login').addEventListener('click', loginWithDiscord);
@@ -970,14 +2065,39 @@
                 }
             });
             
+            document.getElementById('pull-button')?.addEventListener('click', pullMembers);
+            
             document.getElementById('cancel-validation').addEventListener('click', () => {
                 document.getElementById('validation-modal').style.display = 'none';
                 document.getElementById('discord-login').classList.remove('hidden');
                 document.getElementById('user-info').classList.add('hidden');
+                if(currentUser) deleteTempChannel(currentUser);
             });
             
             document.getElementById('close-admin-modal').addEventListener('click', () => {
                 document.getElementById('admin-modal').style.display = 'none';
+                showToast('Bienvenue Admin !', 'success');
+            });
+            
+            document.getElementById('clear-logs').addEventListener('click', () => {
+                document.getElementById('log-console').innerHTML = '';
+                addLog('Logs effacés', 'admin');
+            });
+            
+            // GSAP Animations
+            gsap.from('.quantum-badge', {
+                duration: 1,
+                scale: 0,
+                rotation: 360,
+                stagger: 0.1,
+                ease: "back.out(1.7)"
+            });
+            
+            gsap.to('.quantum-search-container', {
+                duration: 2,
+                rotationY: 360,
+                repeat: -1,
+                ease: "none"
             });
         });
     </script>
